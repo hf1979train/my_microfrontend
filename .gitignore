@@ -1,0 +1,15 @@
+# 設定ファイル
+*/cfg/gmail/*.*
+*/cfg/ssl/*.*
+.env
+
+gin_test
+
+# GPT問答用
+cmp.txt
+question.go
+
+# golangバイナリ
+main
+main_gmail_credentials
+main_migrate
