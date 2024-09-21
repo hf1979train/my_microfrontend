@@ -1,0 +1,17 @@
+{{ define "content" }}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mt-5">DashBoard</h2>
+        {{ if .ResetError }}
+        <div class="alert alert-danger" role="alert">
+            {{ .ResetError }}
+        </div>
+        {{ end }}
+        {{ if .ResetSuccess }}
+        <div class="alert alert-success" role="alert">
+            {{ .ResetSuccess }}
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}

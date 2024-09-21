@@ -1,0 +1,48 @@
+{{ define "content" }}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mt-5">ログイン</h2>
+        {{ if .LoginError }}
+        <div class="alert alert-danger" role="alert">
+            {{ .LoginError }}
+        </div>
+        {{ end }}
+        <form action="/login" method="post">
+            <!-- <input type="hidden" name="_csrf" value="{{.csrfToken}}"> -->
+            <div class="form-group">
+                <label for="email">メールアドレス</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">パスワード</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">ログイン</button>
+        </form>
+        <a href="/request-password-reset" class="btn btn-link mt-2">パスワードを忘れた場合</a>
+        <hr>
+        <h2 class="mt-5">サインイン</h2>
+        {{ if .SignUpSuccess }}
+        <div class="alert alert-success" role="alert">
+            {{ .SignUpSuccess }}
+        </div>
+        {{ end }}
+        {{ if .SignUpError }}
+        <div class="alert alert-danger" role="alert">
+            {{ .SignUpError }}
+        </div>
+        {{ end }}
+        <form action="/signin" method="post">
+            <div class="form-group">
+                <label for="new_email">メールアドレス</label>
+                <input type="email" class="form-control" id="new_email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="new_password">パスワード</label>
+                <input type="password" class="form-control" id="new_password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">サインイン</button>
+        </form>
+    </div>
+</div>
+{{ end }}
