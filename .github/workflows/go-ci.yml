@@ -1,0 +1,68 @@
+name: Go CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        go mod download
+        go install github.com/kisielk/errcheck@latest
+        
+    - name: Build
+      run: |
+        cd src
+        go build -v cmd/app/main.go
+
+    - name: Run errcheck
+      run: errcheck ./...
+
+    # - name: Run golangci-lint
+    #   run: golangci-lint run
+
+    # - name: Run staticcheck
+    #   run: staticcheck ./...
+
+    # - name: Check formatting with gofmt
+    #   run: |
+    #     gofmt_output=$(gofmt -l .)
+    #     if [ -n "$gofmt_output" ]; then
+    #       echo "The following files are not formatted correctly:"
+    #       echo "$gofmt_output"
+    #       exit 1
+    #     fi
+
+    # - name: Check imports with goimports
+    #   run: |
+    #     goimports_output=$(goimports -l .)
+    #     if [ -n "$goimports_output" ]; then
+    #       echo "The following files have incorrect imports:"
+    #       echo "$goimports_output"
+    #       exit 1
+    #     fi
+
+    # - name: Install dependencies
+    #   run: |
+    #     go mod download
+    #     go install honnef.co/go/tools/cmd/staticcheck@latest
+    #     go install github.com/kisielk/errcheck@latest
+    #     go install golang.org/x/tools/cmd/goimports@latest
+    #     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
+
