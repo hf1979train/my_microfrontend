@@ -35,7 +35,7 @@ jobs:
     - name: Run errcheck
       run: |
         cd src
-        errcheck ./...
+        errcheck -asserts ./...
 
     # - name: Run golangci-lint
     #   run: golangci-lint run
