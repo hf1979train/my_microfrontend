@@ -33,7 +33,9 @@ jobs:
         go build -v cmd/app/main.go
 
     - name: Run errcheck
-      run: errcheck ./...
+      run: |
+        cd src
+        errcheck ./...
 
     # - name: Run golangci-lint
     #   run: golangci-lint run
