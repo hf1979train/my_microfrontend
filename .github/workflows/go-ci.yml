@@ -23,6 +23,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        cd src
         go mod download
         go install github.com/kisielk/errcheck@latest
         
