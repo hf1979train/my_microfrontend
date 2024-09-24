@@ -8,7 +8,6 @@ import (
 	"log"
 	"myhomesv/internal/domain/models"
 	"myhomesv/pkg/utils"
-	"os"
 
 	"github.com/joho/godotenv"
 )
@@ -26,8 +25,11 @@ type IAuthUsecase interface {
 // Loginはユーザーのログイン処理を実行
 func (bu *BudgetUsecase) Login(username, password string) (string, error) {
 	user, err := bu.br.FindByUsername(username)
-	if err != nil || user.Password != password {
-		return "", errors.New("invalid username or password")
+	if err != nil {
+		return "", errors.New("invalid username")
+	}
+	if user.Password != password {
+		return "", errors.New("invalid password")
 	}
 
 	// トークンを生成（例として簡略化）
@@ -68,14 +70,10 @@ func (bu *BudgetUsecase) SendResetEmail(email, token string) error {
 	}
 
 	// 環境変数からデータベース接続情報を取得
-	server_host := os.Getenv("SERVER_HOST")
-	server_port := os.Getenv("SERVER_PORT")
-	gmail_credentials := os.Getenv("GMAIL_CREDENTIALS")
-	gmail_token := os.Getenv("GMAIL_TOKEN")
-
 	subject := "Password Reset"
-	body := fmt.Sprintf("Click the link to reset your password: http://%s:%s/reset-password?token=%s", server_host, server_port, token)
-	utils.Send_Gmail(email, subject, body, gmail_credentials, gmail_token)
+	body := fmt.Sprintf("Click the link to reset your password: http://%s:%s/reset-password?token=%s",
+		bu.env_sv.Host, bu.env_sv.Port, token)
+	utils.Send_Gmail(email, subject, body, bu.env_gmail.PathCredentials, bu.env_gmail.PathToken)
 
 	return nil
 

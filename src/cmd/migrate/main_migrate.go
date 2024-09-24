@@ -26,14 +26,18 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to get database instance: %v", err)
 		}
-		sqlDB.Close()
+		if err = sqlDB.Close(); err != nil {
+			log.Fatalf("Failed to close database instance: %v", err)
+		}
 		fmt.Println("database connection closed")
 		fmt.Println("migration sucessful")
 	}()
 	// マイグレーション
 	for _, table := range tables {
 		if !db.Migrator().HasTable(table) {
-			db.AutoMigrate(table)
+			if err := db.AutoMigrate(table); err != nil {
+				log.Fatalf("Failed to migration: %v", err)
+			}
 		}
 	}
 }

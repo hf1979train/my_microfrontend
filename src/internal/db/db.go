@@ -3,32 +3,25 @@ package db
 import (
 	"fmt"
 	"log"
+	"myhomesv/pkg/myenv"
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-func NewDBAll(path_env string) *gorm.DB {
+func NewDBAll(env myenv.Mysql) (*gorm.DB, error) {
 	//func NewDBAll(path_env string) (*gorm.DB, *gorm.DB) {
-	db_budget := NewDB(path_env, "MYSQL_BUDGET")
+	db_budget, err := NewDB(env, "MYSQL_BUDGET")
 	//	return db_fx, db_budget
-	return db_budget
+	return db_budget, err
 }
 
-func NewDB(path_env string, label_db_name string) *gorm.DB {
-	err := godotenv.Load(path_env)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+func NewDB(env myenv.Mysql, label_db_name string) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		os.Getenv("MYSQL_USER"),
-		os.Getenv("MYSQL_PW"), os.Getenv("MYSQL_HOST"),
-		os.Getenv("MYSQL_PORT"), os.Getenv(label_db_name))
+		env.User, env.Password, env.Host, env.Port, env.TableNameBudgeet)
 
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
@@ -46,9 +39,10 @@ func NewDB(path_env string, label_db_name string) *gorm.DB {
 
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 	fmt.Println("Connceted")
-	return db
+	return db, nil
 }
 
 func CLoseDBAll(db_budget *gorm.DB) {

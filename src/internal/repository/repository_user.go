@@ -4,7 +4,8 @@ import (
 	"myhomesv/internal/domain/models"
 	"time"
 
-	"gorm.io/gorm"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm/clause"
 )
 
 // UserRepositoryはユーザーに関するリポジトリのインターフェース
@@ -48,19 +49,32 @@ func (r *BudgetRepository) Update(user models.User) error {
 
 // email, tokenのペアを登録する関数
 func (r *BudgetRepository) RegisterToken(resetToken models.ResetToken) error {
-	var existingToken models.ResetToken
-	if err := r.db.Table("reset_tokens").Where("email = ?", resetToken.Email).First(&existingToken).Error; err == nil {
-		// 既存のレコードが見つかった場合、更新する
-		existingToken.Token = resetToken.Token
-		existingToken.CreatedAt = time.Now()
-		return r.db.Save(&existingToken).Error
-	} else if gorm.ErrRecordNotFound == err {
-		// 既存のレコードが見つからなかった場合、新しいレコードを挿入する
-		return r.db.Table("reset_tokens").Create(&resetToken).Error
-	} else {
-		// その他のエラーが発生した場合
+	// トークンをハッシュ化
+	hashedToken, err := hashToken(resetToken.Token)
+	if err != nil {
 		return err
 	}
+	resetToken.Token = hashedToken
+	resetToken.CreatedAt = time.Now()
+	// アップサート(updateとinsertの組み合わせ)のクエリを実行
+	return r.db.Table("reset_tokens").Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "email"}},
+		DoUpdates: clause.AssignmentColumns([]string{"token", "created_at"}),
+	}).Create(&resetToken).Error
+
+	// var existingToken models.ResetToken
+	// if err := r.db.Table("reset_tokens").Where("email = ?", resetToken.Email).First(&existingToken).Error; err == nil {
+	// 	// 既存のレコードが見つかった場合、更新する
+	// 	existingToken.Token = resetToken.Token
+	// 	existingToken.CreatedAt = time.Now()
+	// 	return r.db.Save(&existingToken).Error
+	// } else if gorm.ErrRecordNotFound == err {
+	// 	// 既存のレコードが見つからなかった場合、新しいレコードを挿入する
+	// 	return r.db.Table("reset_tokens").Create(&resetToken).Error
+	// } else {
+	// 	// その他のエラーが発生した場合
+	// 	return err
+	// }
 }
 
 //	return r.db.Table("reset_tokens").Save(&resetToken).Error
@@ -68,8 +82,12 @@ func (r *BudgetRepository) RegisterToken(resetToken models.ResetToken) error {
 
 // tokenからemailを出力する関数
 func (r *BudgetRepository) GetEmailByToken(token string) (string, error) {
+	hashedToken, err := hashToken(token)
+	if err != nil {
+		return "", err
+	}
 	var resetToken models.ResetToken
-	err := r.db.Table("reset_tokens").Where("token = ?", token).First(&resetToken).Error
+	err = r.db.Table("reset_tokens").Where("token = ?", hashedToken).First(&resetToken).Error
 	if err != nil {
 		return "", err
 	}
@@ -78,5 +96,18 @@ func (r *BudgetRepository) GetEmailByToken(token string) (string, error) {
 
 // tokenを指定して削除する関数
 func (r *BudgetRepository) DeleteToken(token string) error {
-	return r.db.Table("reset_tokens").Where("token = ?", token).Delete(&models.ResetToken{}).Error
+	hashedToken, err := hashToken(token)
+	if err != nil {
+		return err
+	}
+	return r.db.Table("reset_tokens").Where("token = ?", hashedToken).Delete(&models.ResetToken{}).Error
+}
+
+// tokenをハッシュ化する関数
+func hashToken(token string) (string, error) {
+	hashedToken, err := bcrypt.GenerateFromPassword([]byte(token), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedToken), nil
 }

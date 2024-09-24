@@ -134,7 +134,7 @@ func SetupRouter(bc controller.IBudgetController) *gin.Engine {
 			session.Clear()                 // 既存のセッションデータをクリア
 			session.Set("user", "username") // ここでユーザー情報をセッションに保存
 			if err := session.Save(); err != nil {
-				c.HTML(200, "login", gin.H{"title": "login", "LoginError": "セッションの保存に失敗しました"})
+				c.HTML(500, "login", gin.H{"title": "login", "LoginError": "セッションの保存に失敗しました"})
 				return
 			}
 			c.Redirect(http.StatusFound, "/dashboard")
@@ -148,7 +148,7 @@ func SetupRouter(bc controller.IBudgetController) *gin.Engine {
 		if c.Writer.Status() == http.StatusCreated {
 			c.HTML(200, "login", gin.H{"title": "login", "SignUpSuccess": "新規ユーザー登録に成功しました ログインして下さい"})
 		} else {
-			c.HTML(200, "login", gin.H{"title": "login", "SignUpError": "新規ユーザー登録に失敗しました"})
+			c.HTML(500, "login", gin.H{"title": "login", "SignUpError": "新規ユーザー登録に失敗しました"})
 		}
 	})
 	// ログイン処理: パスワードリセット要求
@@ -157,7 +157,7 @@ func SetupRouter(bc controller.IBudgetController) *gin.Engine {
 		if c.Writer.Status() == http.StatusOK {
 			c.HTML(200, "request-password-reset", gin.H{"title": "request-password-reset", "RequestPasswordResetSuccess": "パスワードリセット要求に成功しました メールを確認して下さい"})
 		} else {
-			c.HTML(200, "request-password-reset", gin.H{"title": "request-password-reset", "RequestPasswordResetError": "パスワードリセット要求に失敗しました"})
+			c.HTML(500, "request-password-reset", gin.H{"title": "request-password-reset", "RequestPasswordResetError": "パスワードリセット要求に失敗しました"})
 		}
 	})
 	// ログイン処理: パスワードリセット
@@ -166,7 +166,7 @@ func SetupRouter(bc controller.IBudgetController) *gin.Engine {
 		if c.Writer.Status() == http.StatusOK {
 			c.HTML(200, "reset-password", gin.H{"title": "reset-password", "PasswordResetSuccess": "パスワードリセットに成功しました ログインして下さい"})
 		} else {
-			c.HTML(200, "reset-password", gin.H{"title": "reset-password", "PasswordResetError": "パスワードリセットに失敗しました"})
+			c.HTML(500, "reset-password", gin.H{"title": "reset-password", "PasswordResetError": "パスワードリセットに失敗しました"})
 		}
 	})
 	return r

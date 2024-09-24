@@ -21,13 +21,11 @@ func (bc *budgetController) Login(c *gin.Context) {
 
 	_, err := bc.bu.Login(email, password)
 	if err != nil {
-		// c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		// c.HTML(http.StatusUnauthorized, "login.html", gin.H{"LoginError": "ログインに失敗しました"})
-		c.Writer.WriteHeader(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		// c.Writer.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	c.Writer.WriteHeader(http.StatusOK)
-	//c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
 // SignUpは新規ユーザー登録を処理
@@ -41,14 +39,11 @@ func (bc *budgetController) SignUp(c *gin.Context) {
 		Password: password,
 	})
 	if err != nil {
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
-		c.Writer.WriteHeader(http.StatusInternalServerError)
-		//		c.HTML(http.StatusInternalServerError, "login.html", gin.H{"LoginError": "新規ユーザー登録に失敗しました"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sign up"})
+		// c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	c.Writer.WriteHeader(http.StatusCreated)
-	//JSON(http.StatusCreated, gin.H{})
-	// w.WriteHeader(http.StatusCreated)
 }
 
 // ResetPasswordEmail送信要求
@@ -57,17 +52,20 @@ func (bc *budgetController) RequestSentResetEmail(c *gin.Context) {
 	// リセットトークンを生成
 	token, err := bc.bu.GenerateResetToken()
 	if err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate reset token"})
+		// c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	// リセットトークンをDBに保存
 	if err := bc.bu.SaveResetToken(email, token); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save reset token"})
+		// c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	// リセットメールを送信
 	if err := bc.bu.SendResetEmail(email, token); err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send reset email"})
+		// c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	c.Writer.WriteHeader(http.StatusOK)
@@ -79,12 +77,14 @@ func (bc *budgetController) ResetPassword(c *gin.Context) {
 	password := c.PostForm("password")
 	c_password := c.PostForm("confirm-password")
 	if password != c_password {
+		// c.Writer.WriteHeader(http.StatusBadRequest)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Passwords do not match"})
 		return
 	}
 	err := bc.bu.ResetPassword(token, password)
 	if err != nil {
-		c.Writer.WriteHeader(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to Reset Password"})
+		// c.Writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	c.Writer.WriteHeader(http.StatusOK)
