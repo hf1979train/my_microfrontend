@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  golang:
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - 8055:8080
+    environment:
+      - ENV=development
+    # volumes:
+    #   - /src:/go/src
+      # - type: bind
+      #   source: "./src"
+      #   target: "/go/src"
+      # 開発時は設定ファイルはgolangプロジェクト内に配置してそのまま取り込む
+    tty: true
+    restart: always

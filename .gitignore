@@ -1,8 +1,13 @@
 # 設定ファイル
 */cfg/gmail/*.*
 */cfg/ssl/*.*
+*/cfg/swarm/*.*
+tmp/*.*
 .env
 
+src/web/static/*/*.*
+
+jenkins/*.*
 gin_test
 
 # GPT問答用
