@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: dockerfile
     ports:
-      - 8055:8080
+      - 8056:8080
     environment:
       - ENV=development
     # volumes:
